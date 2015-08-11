@@ -2,14 +2,22 @@
 
 import argparse
 import re
-import sys
-import os
 
 
 def get_options():
     """
+    Function to grab commandline options to generate region configuration file
+    from provided parameters.
+
+    param:  None
     """
     def format_error(err_string):
+        """
+        Function to print standard formatting error for each region parameter
+        provided.
+       
+        param:  err_string:  variable that has the incorrect format
+        """
         msg = ("\nIncorrect Region \'key=value\' format - " + err_string + "\nPlease use "
                + "the following format: " + "\n" + "\t" +
                "region_name=ParameterValue,ip=ParameterValue," +
@@ -17,6 +25,12 @@ def get_options():
         return msg
 
     def region_check(region):
+        """
+        Function to check formatting of parameters passed for each region
+        
+        param:  region:  string that should contain the following format - 
+                region_name=ParameterValue,ip=ParameterValue,domain_name=ParameterValue
+        """
         # Check each region has correct number of parameters
         try:
             region_name, ip, domain_name = region.split(',')        
