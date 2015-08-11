@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import json
 
 
 def get_options():
@@ -80,6 +81,20 @@ def get_options():
             raise argparse.ArgumentTypeError(msg + domain_msg)
 
         return region
+
+    def http_check(protocol):
+        """
+        Function to confirm if protocol is either http or https
+  
+        param:  protocol: Define http or https protocol
+        """
+        if not re.match('^http$|^https$', protocol, re.I):
+            msg = ("\n\nPROTOCOL is not in the correct format. " +
+                   "Accepted values: \'http\' or \'https\'. " +
+                   "Default value: \'http\'.")
+            raise argparse.ArgumentTypeError(msg)
+
+        return protocol
                    
     parser = argparse.ArgumentParser(prog="region-config-tool.py",
                  usage='%(prog)s REGION [REGION ...] [-f | --filename] FILE_NAME',
@@ -101,11 +116,39 @@ def get_options():
     file_group.add_argument('-f', '--filename', dest='file_name', 
                             type=argparse.FileType('w'),
                             help="Generated region configuration file.")
+    http_option = parser.add_argument_group("HTTP/HTTPS Protocol Flag Argument",
+                                            "Argument to set HTTP or HTTPS for Service Endpoints")
+    http_option.add_argument('-p', '--protocol', dest='protocol',
+                             type=http_check, default='http',
+                             help="Flag to use HTTP/HTTPS for Service Endpoints. Default: http")
     options = parser.parse_args()
     return options
 
 if __name__ == "__main__":
     # Grab commandline options for region configuration
     options = get_options()
-    print options.region
-
+    region_config = {'Regions': []}
+    for region in options.region:
+        region_name, ip, domain_name = region.split(',')
+        identifier = options.region.index(region) + 1
+        region_config['Regions'].append({
+            'Name': region_name.split('=')[1],
+            'CertificateFingerprintDigest': 'SHA-256',
+            'CertificateFingerprint': '',
+            'IdentifierPartitions': [ identifier ],
+            'Services': [
+                {
+                 'Type': 'identity',
+                 'Endpoints': [ options.protocol + '://identity.' + domain_name.split('=')[1] + ':8773/' ]
+                },
+                {
+                 'Type': 'compute',
+                 'Endpoints': [ options.protocol + '://compute.' + domain_name.split('=')[1] + ':8773/' ]
+                }
+             ]
+         })
+           
+    with options.file_name as json_file:
+        json.dump(region_config, json_file, sort_keys=True,
+                  indent=4, separators=(',', ': '))
+    json_file.closed
