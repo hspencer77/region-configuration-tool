@@ -87,7 +87,8 @@ def get_options():
                  multiple region (i.e. cloud) parameters that are intended to be \
                  part of a federated environment.')
     region_group = parser.add_argument_group("Region Arguments", "Arguments to define multiple regions")
-    region_group.add_argument('region', nargs='+', type=region_check, help='Region defintion; \
+    region_group.add_argument('region', nargs='+', type=region_check, 
+                              help='Region defintion; \
                               multiple regions separated by spaces; should \
                               contain the following format for each entry: \
                               region_name=ParameterValue,ip=ParameterValue,domain_name=ParameterValue.\
@@ -97,7 +98,9 @@ def get_options():
                               system.dns.dnsdomain cloud property')
     file_group = parser.add_argument_group("Region Configuration File Argument", 'Argument to define name of \
                                            of generated region configuration file.') 
-    file_group.add_argument('-f', '--filename', dest='file_name', help="Generated region configuration file.")
+    file_group.add_argument('-f', '--filename', dest='file_name', 
+                            type=argparse.FileType('w'),
+                            help="Generated region configuration file.")
     options = parser.parse_args()
     return options
 
