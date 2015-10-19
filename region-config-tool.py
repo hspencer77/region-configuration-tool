@@ -250,7 +250,7 @@ if __name__ == "__main__":
                                ':8773/']},
                 {'Type': 'compute',
                  'Endpoints': [options.protocol +
-                               '://compute.' +
+                               '://ec2.' +
                                domain_name.split('=')[1] +
                                ':8773/']}
             ]
